@@ -1,37 +1,69 @@
-# docker-openresty-oidc
-> Luarocks + openresty + lua-resty-openidc in a minimal Alpine image (60MB)
+# Docker OpenResty OpenID-Connect
 
-- Public releases versions follow semver, matching lua-resty-openidc versioning, e.g. 1.7.2
+This repository contains the Docker build for OpenResty with the `lua-resty-openidc` library. `lua-resty-openidc` is a library for Nginx that allows it to perform OpenID Connect (OIDC) authentication.
 
-- The official release that includes luarocks is 107MB: [openresty/openresty:alpine-fat](https://hub.docker.com/r/openresty/openresty/tags)
+This Docker image can be used as a reverse proxy to protect your applications with OIDC authentication.
 
-- Original Docker projects:
-    - [zot24/openresty](https://hub.docker.com/r/zot24/openresty)
-    - [zot24/openresty-luarocks](https://hub.docker.com/r/zot24/openresty-luarocks)
+## Included Software
 
-- OpenResty: http://openresty.org
-- OpenID Connect LUA plugin: https://github.com/zmartzone/lua-resty-openidc
-- [Removed] ~~lua-resty-xacml-pep library: https://github.com/zmartzone/lua-resty-xacml-pep~~
+The Docker image is based on Alpine Linux and includes the following software:
 
-# TODO
-- [ ] Run openresty as unpriviledged user, for improved security
+-   OpenResty 1.21.4.1
+-   LuaJIT 2.1
+-   `lua-resty-openidc` 1.7.2-1
+-   `dnsmasq`
 
-# Changelog
-- 2019-10-18 [1.7.2-2]:
-    - Now dnsmasq is started before openresty, so local 127.0.0.1 resolver can be used in nginx
-- 2019-08-23 [1.7.2-1]:
-    - Bumped versions:
-        - alpine linux base image: 3.10
-        - luarocks: 3.1.3
-        - openresty: 1.15.8.2
-        - lua-resty-openidc: 1.7.2-1
-    - Removed lua-resty-xacml-pep
-    - Removed install of obsolete luarocks package `lua-resty-hmac`, as it is now included in the dependent [lua-jwt](https://luarocks.org/modules/cdbattags/lua-resty-jwt)
-- 2018-11-13:
-    - Added lua-resty-hmac to prevent `state from argument: X does not match state restored from session Y` issue. See https://github.com/zmartzone/lua-resty-openidc/issues/213
-- 2018-10-17:
-    - Added library [lua-resty-xacml-pep](https://github.com/zmartzone/lua-resty-xacml-pep) to implement the XACML Policy Enforcement Point functionality using the REST and JSON Profiles of XACML 3.0
-    - Upgraded luarocks version to 2.4.4 and changed download url to http://luarocks.github.io/luarocks/releases/luarocks-x.y.z.tar.gz
-    - Added `--squash` to docker build
-- 2018-10-04:
-    - Updated OpenResty to 1.13.6.2 in Dockerfile
+## Getting Started
+
+### Prerequisites
+
+-   Docker must be installed on your system.
+
+### Building the Image
+
+To build the Docker image, you can use the provided `build.sh` script:
+
+```bash
+./build.sh
+```
+
+This will build the image with the tag `local/docker-openresty-openidc`.
+
+### Running the Container
+
+To run the container for testing or debugging purposes, you can use the `run.sh` script:
+
+```bash
+./run.sh
+```
+
+This will start the container in interactive mode and remove it when you exit.
+
+For a production deployment, you will need to run the container in detached mode and map the necessary ports and volumes. For example:
+
+```bash
+docker run -d \
+    --name my-openresty-oidc \
+    -p 80:80 -p 443:443 \
+    -v /path/to/your/nginx.conf:/opt/openresty/nginx/conf/nginx.conf \
+    local/docker-openresty-openidc
+```
+
+## Configuration
+
+This Docker image provides the necessary software, but you will need to configure OpenResty and `lua-resty-openidc` to suit your needs. This involves setting up your OIDC provider, configuring the redirect URI, and defining your authentication and authorization rules.
+
+For more information on how to configure `lua-resty-openidc`, please refer to the official documentation: [https://github.com/zmartzone/lua-resty-openidc](https://github.com/zmartzone/lua-resty-openidc)
+
+## Helper Scripts
+
+This repository includes the following helper scripts:
+
+-   `common.sh`: Defines common variables used by the other scripts.
+-   `build.sh`: Builds the Docker image.
+-   `run.sh`: Runs the container in interactive mode for testing.
+-   `push-to-remote-registries.sh`: Pushes the Docker image to one or more remote registries.
+
+## License
+
+This project is licensed under the terms of the LICENSE file.
